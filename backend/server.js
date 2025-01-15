@@ -26,7 +26,6 @@ mongoose
     console.error('Error connecting to MongoDB Atlas:', err.message);
   });
 
-
 // Registration Endpoint
 app.post('/api/register', async (req, res) => {
   const { name, email, password, confirmPassword } = req.body;
