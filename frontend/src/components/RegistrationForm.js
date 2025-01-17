@@ -16,6 +16,12 @@ const RegistrationForm = () => {
 
   const navigate = useNavigate();
 
+  // Backend URL: Adjust dynamically for local and production
+  const backendURL =
+    process.env.NODE_ENV === 'development'
+      ? 'http://localhost:5000/api'
+      : 'https://signup-form-backend.vercel.app/api';
+
   const checkPasswordStrength = (password) => {
     let strengthMessage = '';
     let isValid = true;
@@ -48,47 +54,46 @@ const RegistrationForm = () => {
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  if (!validator.isEmail(email)) {
-    setError('Please enter a valid email address');
-    return;
-  }
+    if (!validator.isEmail(email)) {
+      setError('Please enter a valid email address');
+      return;
+    }
 
-  if (password !== confirmPassword) {
-    setError('Passwords do not match');
-    return;
-  }
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
 
-  if (passwordStrength !== 'Password is strong') {
-    setError('Please ensure your password meets the strength requirements');
-    return;
-  }
+    if (passwordStrength !== 'Password is strong') {
+      setError('Please ensure your password meets the strength requirements');
+      return;
+    }
 
-  setLoading(true);
+    setLoading(true);
 
-  try {
-    const response = await axios.post('https://signup-form-backend.vercel.app/api/register', {
-      name,
-      email,
-      password,
-      confirmPassword,
-    });
-    setSuccessMessage(response.data.message);
-    setError('');
-    setName('');
-    setEmail('');
-    setPassword('');
-    setConfirmPassword('');
-    navigate('/login');
-  } catch (err) {
-    setError(err.response?.data?.message || 'An error occurred');
-    setSuccessMessage('');
-  } finally {
-    setLoading(false);
-  }
-};
-
+    try {
+      const response = await axios.post(`${backendURL}/register`, {
+        name,
+        email,
+        password,
+        confirmPassword,
+      });
+      setSuccessMessage(response.data.message);
+      setError('');
+      setName('');
+      setEmail('');
+      setPassword('');
+      setConfirmPassword('');
+      navigate('/login');
+    } catch (err) {
+      setError(err.response?.data?.message || 'An error occurred');
+      setSuccessMessage('');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="form-container">
@@ -99,10 +104,20 @@ const RegistrationForm = () => {
 
       <form onSubmit={handleSubmit}>
         <label>Name:</label>
-        <input type="text" value={name} onChange={(e) => setName(e.target.value)} required />
+        <input
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+        />
 
         <label>Email:</label>
-        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
 
         <label>Password:</label>
         <input
@@ -122,7 +137,11 @@ const RegistrationForm = () => {
           onChange={handleConfirmPasswordChange}
           required
         />
-        <div className={`password-match ${passwordMatch ? 'correct' : 'incorrect'}`}>
+        <div
+          className={`password-match ${
+            passwordMatch ? 'correct' : 'incorrect'
+          }`}
+        >
           {passwordMatch === false && <small>Passwords do not match</small>}
           {passwordMatch === true && <small>Passwords match</small>}
         </div>

@@ -3,22 +3,30 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const validator = require('validator');
 require('dotenv').config();
 const User = require('./models/User');
 
+// Initialize Express App
 const app = express();
 
 // Middleware
-const cors = require('cors');
+const allowedOrigins = [
+  'http://localhost:3000', // Local frontend
+  'https://signup-form-frontend.vercel.app', // Deployed frontend
+];
 
-// Allow requests from your frontend URL
-app.use(cors({
-  origin: 'https://signup-form-frontend.vercel.app', // Your frontend's deployed URL
-  methods: ['GET', 'POST'],
-  credentials: true, // If you need to send cookies
-}));
-
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    methods: ['GET', 'POST'], // Allow only GET and POST methods
+  })
+);
 app.use(bodyParser.json());
 
 // MongoDB Connection
@@ -34,30 +42,17 @@ mongoose
 app.post('/api/register', async (req, res) => {
   const { name, email, password, confirmPassword } = req.body;
 
-  // Input validation
-  if (!validator.isEmail(email)) {
-    return res.status(400).json({ message: 'Invalid email format' });
-  }
-
-  if (password.length < 6) {
-    return res.status(400).json({ message: 'Password should be at least 6 characters long' });
-  }
-
-  if (password !== confirmPassword) {
-    return res.status(400).json({ message: 'Password and Confirm Password do not match' });
+  if (!name || !email || !password || !confirmPassword) {
+    return res.status(400).json({ message: 'All fields are required' });
   }
 
   try {
-    // Check if the email is already registered
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ message: 'Email ID already registered' });
+      return res.status(400).json({ message: 'Email already registered' });
     }
 
-    // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Save the user to the database
     const newUser = new User({ name, email, password: hashedPassword });
     await newUser.save();
 
@@ -90,10 +85,15 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-// Default Route for Health Check
+// Health Check Route
 app.get('/', (req, res) => {
   res.send('Backend is working!');
 });
 
-// Export for Vercel Serverless Functions
-module.exports = app;
+// Server Setup for Local and Vercel
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+});
+
+module.exports = app; // Export for Vercel

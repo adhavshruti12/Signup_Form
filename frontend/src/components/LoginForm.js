@@ -9,11 +9,17 @@ const LoginForm = () => {
   const [successMessage, setSuccessMessage] = useState('');
   const navigate = useNavigate();
 
+  // Backend URL: Adjust dynamically for local and production
+  const backendURL =
+    process.env.NODE_ENV === 'development'
+      ? 'http://localhost:5000/api'
+      : 'https://signup-form-backend.vercel.app/api';
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      const response = await axios.post('https://signup-form-backend.vercel.app/api/login', {
+      const response = await axios.post(`${backendURL}/login`, {
         email,
         password,
       });
