@@ -33,7 +33,7 @@ body {
 }
 
 .form-container:hover {
-  background-color: #d4e1f999; /* Darker background on hover */
+  background-color: white; /* Darker background on hover */
   box-shadow: 0 6px 12px rgba(219, 77, 235, 0.2); /* Enhanced shadow effect */
   transform: scale(1.05); /* Slightly scale up the container */
 }
