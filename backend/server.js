@@ -31,8 +31,13 @@ mongoose
   .catch((err) => console.error('Error connecting to MongoDB:', err.message));
 
 // Registration Endpoint
-app.post('/api/register', async (req, res) => {
-  const { name, email, password, confirmPassword } = req.body;
+const response = await axios.post('/api/register', {
+  name,
+  email,
+  password,
+  confirmPassword,
+});
+
 
   // Input validation
   if (!validator.isEmail(email)) {
