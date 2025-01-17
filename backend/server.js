@@ -11,12 +11,12 @@ const app = express();
 
 // Middleware for CORS
 app.use(cors({
-  origin: 'https://signup-form-frontend.vercel.app', // Allow frontend URL
-  methods: ['GET', 'POST'], // Allow only GET and POST
-  credentials: true, // Allow credentials if required
+  origin: 'https://signup-form-frontend.vercel.app', // Your Vercel frontend URL
+  methods: ['GET', 'POST'],
+  credentials: true,
 }));
 
-// Additional Headers (if required)
+// Additional Headers for CORS (optional but helps in some cases)
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', 'https://signup-form-frontend.vercel.app');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST');
@@ -24,6 +24,7 @@ app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   next();
 });
+
 
 // Body parser
 app.use(bodyParser.json());
