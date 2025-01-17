@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import validator from 'validator';
-import { useNavigate } from 'react-router-dom';
+import validator from 'validator'; // Email validation
+import { useNavigate } from 'react-router-dom'; // For navigation
 
 const RegistrationForm = () => {
   const [name, setName] = useState('');
@@ -15,7 +15,6 @@ const RegistrationForm = () => {
   const [passwordStrength, setPasswordStrength] = useState('');
 
   const navigate = useNavigate();
-  const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
 
   const checkPasswordStrength = (password) => {
     let strengthMessage = '';
@@ -38,16 +37,14 @@ const RegistrationForm = () => {
   const handlePasswordChange = (e) => {
     const newPassword = e.target.value;
     setPassword(newPassword);
-    const isValid = checkPasswordStrength(newPassword);
-    if (isValid && confirmPassword) {
-      setPasswordMatch(newPassword === confirmPassword);
-    }
+    checkPasswordStrength(newPassword);
+    setPasswordMatch(newPassword === confirmPassword);
   };
 
   const handleConfirmPasswordChange = (e) => {
     const newConfirmPassword = e.target.value;
     setConfirmPassword(newConfirmPassword);
-    setPasswordMatch(password === newConfirmPassword && newConfirmPassword !== '');
+    setPasswordMatch(password === newConfirmPassword);
   };
 
   const handleSubmit = async (e) => {
@@ -71,12 +68,14 @@ const RegistrationForm = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post(`${backendUrl}/register`, {
+      // Hardcoded Vercel Backend API URL
+      const response = await axios.post('https://signup-form-backend.vercel.app/register', {
         name,
         email,
         password,
         confirmPassword,
       });
+
       setSuccessMessage(response.data.message);
       setError('');
       setName('');
@@ -85,8 +84,9 @@ const RegistrationForm = () => {
       setConfirmPassword('');
       navigate('/login');
     } catch (err) {
-      console.error('Error during registration:', err);
-      setError(err?.response?.data?.message || 'An error occurred. Please try again.');
+      // Improved error handling
+      console.error(err);
+      setError(err.response?.data?.message || 'An error occurred during registration');
       setSuccessMessage('');
     } finally {
       setLoading(false);
@@ -114,7 +114,7 @@ const RegistrationForm = () => {
           onChange={handlePasswordChange}
           required
         />
-        <div className={`password-strength ${passwordStrength === 'Password is strong' ? 'strong' : 'weak'}`}>
+        <div className="password-strength">
           <small>{passwordStrength}</small>
         </div>
 
