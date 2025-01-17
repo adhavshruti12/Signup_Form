@@ -12,7 +12,7 @@ const app = express();
 const corsOptions = {
   origin: (origin, callback) => {
     const allowedOrigins = [
-      'https://frontend-kappa-nine-74.vercel.app', // Allow the frontend domain
+      'https://signup-form-frontend.vercel.app/', // Allow the frontend domain
     ];
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
