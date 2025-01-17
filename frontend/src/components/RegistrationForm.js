@@ -47,51 +47,51 @@ const RegistrationForm = () => {
     setPasswordMatch(password === newConfirmPassword);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+const API_URL = process.env.REACT_APP_BACKEND_URL;
 
-    if (!validator.isEmail(email)) {
-      setError('Please enter a valid email address');
-      return;
-    }
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    if (password !== confirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
+  if (!validator.isEmail(email)) {
+    setError('Please enter a valid email address');
+    return;
+  }
 
-    if (passwordStrength !== 'Password is strong') {
-      setError('Please ensure your password meets the strength requirements');
-      return;
-    }
+  if (password !== confirmPassword) {
+    setError('Passwords do not match');
+    return;
+  }
 
-    setLoading(true);
+  if (passwordStrength !== 'Password is strong') {
+    setError('Please ensure your password meets the strength requirements');
+    return;
+  }
 
-    try {
-      // Hardcoded Vercel Backend API URL
-      const response = await axios.post('https://signup-form-backend.vercel.app/register', {
-        name,
-        email,
-        password,
-        confirmPassword,
-      });
+  setLoading(true);
 
-      setSuccessMessage(response.data.message);
-      setError('');
-      setName('');
-      setEmail('');
-      setPassword('');
-      setConfirmPassword('');
-      navigate('/login');
-    } catch (err) {
-      // Improved error handling
-      console.error(err);
-      setError(err.response?.data?.message || 'An error occurred during registration');
-      setSuccessMessage('');
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    const response = await axios.post(`${API_URL}/api/register`, {
+      name,
+      email,
+      password,
+      confirmPassword,
+    });
+
+    setSuccessMessage(response.data.message);
+    setError('');
+    setName('');
+    setEmail('');
+    setPassword('');
+    setConfirmPassword('');
+    navigate('/login');
+  } catch (err) {
+    console.error(err);
+    setError(err.response?.data?.message || 'An error occurred during registration');
+    setSuccessMessage('');
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="form-container">
