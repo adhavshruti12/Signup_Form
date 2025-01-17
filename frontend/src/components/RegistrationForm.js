@@ -16,7 +16,6 @@ const RegistrationForm = () => {
 
   const navigate = useNavigate();
 
-  // Password strength check function
   const checkPasswordStrength = (password) => {
     let strengthMessage = '';
     let isValid = true;
@@ -35,7 +34,6 @@ const RegistrationForm = () => {
     return isValid;
   };
 
-  // Handle password change
   const handlePasswordChange = (e) => {
     const newPassword = e.target.value;
     setPassword(newPassword);
@@ -43,63 +41,54 @@ const RegistrationForm = () => {
     setPasswordMatch(newPassword === confirmPassword);
   };
 
-  // Handle confirm password change
   const handleConfirmPasswordChange = (e) => {
     const newConfirmPassword = e.target.value;
     setConfirmPassword(newConfirmPassword);
     setPasswordMatch(password === newConfirmPassword);
   };
 
-  // Handle form submit
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    // Form validation
-    if (!validator.isEmail(email)) {
-      setError('Please enter a valid email address');
-      return;
-    }
+  if (!validator.isEmail(email)) {
+    setError('Please enter a valid email address');
+    return;
+  }
 
-    if (password !== confirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
+  if (password !== confirmPassword) {
+    setError('Passwords do not match');
+    return;
+  }
 
-    if (passwordStrength !== 'Password is strong') {
-      setError('Please ensure your password meets the strength requirements');
-      return;
-    }
+  if (passwordStrength !== 'Password is strong') {
+    setError('Please ensure your password meets the strength requirements');
+    return;
+  }
 
-    setLoading(true);
+  setLoading(true);
 
-    try {
-      // Directly specify the backend URL
-      const API_URL = 'https://signup-form-backend.vercel.app'; // Direct URL without .env
+  try {
+    const response = await axios.post('https://signup-form-backend.vercel.app/register', {
+      name,
+      email,
+      password,
+      confirmPassword,
+    });
+    setSuccessMessage(response.data.message);
+    setError('');
+    setName('');
+    setEmail('');
+    setPassword('');
+    setConfirmPassword('');
+    navigate('/login');
+  } catch (err) {
+    setError(err.response?.data?.message || 'An error occurred');
+    setSuccessMessage('');
+  } finally {
+    setLoading(false);
+  }
+};
 
-      const response = await axios.post(`${API_URL}/api/register`, {
-        name,
-        email,
-        password,
-        confirmPassword,
-      });
-
-      // Handle success response
-      setSuccessMessage(response.data.message);
-      setError('');
-      setName('');
-      setEmail('');
-      setPassword('');
-      setConfirmPassword('');
-      navigate('/login');
-    } catch (err) {
-      // Enhanced error handling
-      console.error('Registration Error:', err); // Log the error for debugging
-      setError(err.response?.data?.message || 'An error occurred');
-      setSuccessMessage('');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <div className="form-container">
@@ -110,20 +99,10 @@ const RegistrationForm = () => {
 
       <form onSubmit={handleSubmit}>
         <label>Name:</label>
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-        />
+        <input type="text" value={name} onChange={(e) => setName(e.target.value)} required />
 
         <label>Email:</label>
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
+        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
 
         <label>Password:</label>
         <input
