@@ -73,15 +73,16 @@ const RegistrationForm = () => {
     setLoading(true);
 
     try {
-      // Use environment variable for API URL (if applicable)
-      const API_URL = process.env.REACT_APP_API_URL || 'https://signup-form-backend.vercel.app'; // Fallback to default URL
+      // Directly specify the backend URL
+      const API_URL = 'https://signup-form-backend.vercel.app'; // Direct URL without .env
+
       const response = await axios.post(`${API_URL}/api/register`, {
         name,
         email,
         password,
         confirmPassword,
       });
-      
+
       // Handle success response
       setSuccessMessage(response.data.message);
       setError('');
