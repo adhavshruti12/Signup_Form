@@ -80,8 +80,8 @@ const RegistrationForm = () => {
       setConfirmPassword('');
       navigate('/login');
     } catch (err) {
-      setError(err.response?.data?.message || 'An error occurred');
-      setSuccessMessage('');
+    setError(err.response && err.response.data && err.response.data.message ? err.response.data.message : 'An error occurred');
+     setSuccessMessage('');
     } finally {
       setLoading(false);
     }
