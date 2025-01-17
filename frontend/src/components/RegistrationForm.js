@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import validator from 'validator'; // Email validation
-import { useNavigate } from 'react-router-dom'; // For navigation
+import validator from 'validator';
+import { useNavigate } from 'react-router-dom';
 
 const RegistrationForm = () => {
   const [name, setName] = useState('');
@@ -15,6 +15,7 @@ const RegistrationForm = () => {
   const [passwordStrength, setPasswordStrength] = useState('');
 
   const navigate = useNavigate();
+  const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
 
   const checkPasswordStrength = (password) => {
     let strengthMessage = '';
@@ -37,58 +38,60 @@ const RegistrationForm = () => {
   const handlePasswordChange = (e) => {
     const newPassword = e.target.value;
     setPassword(newPassword);
-    checkPasswordStrength(newPassword);
-    setPasswordMatch(newPassword === confirmPassword);
+    const isValid = checkPasswordStrength(newPassword);
+    if (isValid && confirmPassword) {
+      setPasswordMatch(newPassword === confirmPassword);
+    }
   };
 
   const handleConfirmPasswordChange = (e) => {
     const newConfirmPassword = e.target.value;
     setConfirmPassword(newConfirmPassword);
-    setPasswordMatch(password === newConfirmPassword);
+    setPasswordMatch(password === newConfirmPassword && newConfirmPassword !== '');
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  if (!validator.isEmail(email)) {
-    setError('Please enter a valid email address');
-    return;
-  }
+    if (!validator.isEmail(email)) {
+      setError('Please enter a valid email address');
+      return;
+    }
 
-  if (password !== confirmPassword) {
-    setError('Passwords do not match');
-    return;
-  }
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
 
-  if (passwordStrength !== 'Password is strong') {
-    setError('Please ensure your password meets the strength requirements');
-    return;
-  }
+    if (passwordStrength !== 'Password is strong') {
+      setError('Please ensure your password meets the strength requirements');
+      return;
+    }
 
-  setLoading(true);
+    setLoading(true);
 
-  try {
-    const response = await axios.post('https://signup-form-backend.vercel.app/register', {
-      name,
-      email,
-      password,
-      confirmPassword,
-    });
-    setSuccessMessage(response.data.message);
-    setError('');
-    setName('');
-    setEmail('');
-    setPassword('');
-    setConfirmPassword('');
-    navigate('/login');
-  } catch (err) {
-    setError(err.response?.data?.message || 'An error occurred');
-    setSuccessMessage('');
-  } finally {
-    setLoading(false);
-  }
-};
-
+    try {
+      const response = await axios.post(`${backendUrl}/register`, {
+        name,
+        email,
+        password,
+        confirmPassword,
+      });
+      setSuccessMessage(response.data.message);
+      setError('');
+      setName('');
+      setEmail('');
+      setPassword('');
+      setConfirmPassword('');
+      navigate('/login');
+    } catch (err) {
+      console.error('Error during registration:', err);
+      setError(err?.response?.data?.message || 'An error occurred. Please try again.');
+      setSuccessMessage('');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="form-container">
@@ -111,7 +114,7 @@ const RegistrationForm = () => {
           onChange={handlePasswordChange}
           required
         />
-        <div className="password-strength">
+        <div className={`password-strength ${passwordStrength === 'Password is strong' ? 'strong' : 'weak'}`}>
           <small>{passwordStrength}</small>
         </div>
 
