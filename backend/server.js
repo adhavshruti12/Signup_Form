@@ -10,13 +10,15 @@ const User = require('./models/User');
 const app = express();
 
 // Middleware
-app.use(
-  cors({
-    origin: process.env.FRONTEND_URL || 'https://signup-form-frontend.vercel.app', // Use environment variable for flexibility
-    methods: ['POST', 'GET'], // Specify allowed methods
-    credentials: true, // Allow cookies and authorization headers
-  })
-);
+const cors = require('cors');
+
+// Allow requests from your frontend URL
+app.use(cors({
+  origin: 'https://signup-form-frontend.vercel.app/', // Your frontend's deployed URL
+  methods: ['GET', 'POST'],
+  credentials: true, // If you need to send cookies
+}));
+
 app.use(bodyParser.json());
 
 // MongoDB Connection
