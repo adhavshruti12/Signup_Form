@@ -4,19 +4,16 @@ const bcrypt = require('bcryptjs');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const validator = require('validator');
-require('dotenv').config();
+require('dotenv').config(); // Even though you're not using .env for API URL, still use it for DB connection
 const User = require('./models/User');
 
 const app = express();
 
 // Middleware
-const cors = require('cors');
-
-// Allow requests from your frontend URL
 app.use(cors({
-  origin: 'https://signup-form-frontend.vercel.app', // Your frontend's deployed URL
+  origin: 'https://signup-form-frontend.vercel.app', // The frontend URL
   methods: ['GET', 'POST'],
-  credentials: true, // If you need to send cookies
+  credentials: true, // If needed
 }));
 
 app.use(bodyParser.json());
@@ -64,28 +61,6 @@ app.post('/api/register', async (req, res) => {
     res.status(201).json({ message: 'User registered successfully' });
   } catch (error) {
     console.error('Error during registration:', error);
-    res.status(500).json({ message: 'Internal server error' });
-  }
-});
-
-// Login Endpoint
-app.post('/api/login', async (req, res) => {
-  const { email, password } = req.body;
-
-  try {
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      return res.status(401).json({ message: 'Invalid email or password' });
-    }
-
-    res.status(200).json({ name: user.name, message: `Welcome, ${user.name}!` });
-  } catch (error) {
-    console.error('Login error:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
