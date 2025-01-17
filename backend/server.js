@@ -88,7 +88,7 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-// Default Route for Health Check (Vercel needs this)
+// Default Route for Health Check
 app.get('/', (req, res) => {
   res.send('Backend is up and running!');
 });
