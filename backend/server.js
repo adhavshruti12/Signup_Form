@@ -10,16 +10,12 @@ const User = require('./models/User');
 const app = express();
 
 // Middleware
-const cors = require('cors');
-
-// Allow requests from your frontend URL
 app.use(cors({
-  origin: 'https://signup-form-frontend.vercel.app', // Your frontend's deployed URL
-  methods: ['GET', 'POST'],
-  credentials: true, // If you need to send cookies
+  origin: 'https://signup-form-frontend.vercel.app', // Frontend deployed URL
+  methods: ['GET', 'POST'], // Allowed methods
+  credentials: true, // If cookies are used
 }));
-
-app.use(bodyParser.json());
+app.use(bodyParser.json()); // Parse incoming JSON requests
 
 // MongoDB Connection
 mongoose
@@ -34,7 +30,7 @@ mongoose
 app.post('/api/register', async (req, res) => {
   const { name, email, password, confirmPassword } = req.body;
 
-  // Input validation
+  // Input Validation
   if (!validator.isEmail(email)) {
     return res.status(400).json({ message: 'Invalid email format' });
   }
@@ -48,10 +44,10 @@ app.post('/api/register', async (req, res) => {
   }
 
   try {
-    // Check if the email is already registered
+    // Check if email is already registered
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ message: 'Email ID already registered' });
+      return res.status(409).json({ message: 'Email ID already registered' });
     }
 
     // Hash the password
@@ -63,7 +59,7 @@ app.post('/api/register', async (req, res) => {
 
     res.status(201).json({ message: 'User registered successfully' });
   } catch (error) {
-    console.error('Error during registration:', error);
+    console.error('Error during registration:', error.message);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
@@ -73,11 +69,13 @@ app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
 
   try {
+    // Find user by email
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
+    // Validate password
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return res.status(401).json({ message: 'Invalid email or password' });
@@ -85,7 +83,7 @@ app.post('/api/login', async (req, res) => {
 
     res.status(200).json({ name: user.name, message: `Welcome, ${user.name}!` });
   } catch (error) {
-    console.error('Login error:', error);
+    console.error('Login error:', error.message);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
