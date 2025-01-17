@@ -9,13 +9,24 @@ const User = require('./models/User');
 
 const app = express();
 
-// Middleware
+// Middleware for CORS
 app.use(cors({
-  origin: 'https://signup-form-frontend.vercel.app', // Frontend deployed URL
-  methods: ['GET', 'POST'], // Allowed methods
-  credentials: true, // If cookies are used
+  origin: 'https://signup-form-frontend.vercel.app', // Allow frontend URL
+  methods: ['GET', 'POST'], // Allow only GET and POST
+  credentials: true, // Allow credentials if required
 }));
-app.use(bodyParser.json()); // Parse incoming JSON requests
+
+// Additional Headers (if required)
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', 'https://signup-form-frontend.vercel.app');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  next();
+});
+
+// Body parser
+app.use(bodyParser.json());
 
 // MongoDB Connection
 mongoose
@@ -28,9 +39,9 @@ mongoose
 
 // Registration Endpoint
 app.post('/api/register', async (req, res) => {
+  console.log('Registration request received:', req.body); // Debugging log
   const { name, email, password, confirmPassword } = req.body;
 
-  // Input Validation
   if (!validator.isEmail(email)) {
     return res.status(400).json({ message: 'Invalid email format' });
   }
@@ -44,16 +55,13 @@ app.post('/api/register', async (req, res) => {
   }
 
   try {
-    // Check if email is already registered
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(409).json({ message: 'Email ID already registered' });
     }
 
-    // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Save the user to the database
     const newUser = new User({ name, email, password: hashedPassword });
     await newUser.save();
 
@@ -66,16 +74,15 @@ app.post('/api/register', async (req, res) => {
 
 // Login Endpoint
 app.post('/api/login', async (req, res) => {
+  console.log('Login request received:', req.body); // Debugging log
   const { email, password } = req.body;
 
   try {
-    // Find user by email
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Validate password
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return res.status(401).json({ message: 'Invalid email or password' });
@@ -88,10 +95,10 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-// Default Route for Health Check
+// Default Route
 app.get('/', (req, res) => {
   res.send('Backend is working!');
 });
 
-// Export for Vercel Serverless Functions
+// Export for Vercel
 module.exports = app;
