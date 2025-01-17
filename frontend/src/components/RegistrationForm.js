@@ -68,7 +68,7 @@ const RegistrationForm = () => {
   setLoading(true);
 
   try {
-    const response = await axios.post('https://signup-form-backend.vercel.app/register', {
+    const response = await axios.post('https://signup-form-backend.vercel.app/', {
       name,
       email,
       password,
