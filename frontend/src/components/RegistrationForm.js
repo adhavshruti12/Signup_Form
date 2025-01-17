@@ -47,9 +47,7 @@ const RegistrationForm = () => {
     setPasswordMatch(password === newConfirmPassword);
   };
 
-const API_URL = process.env.REACT_APP_BACKEND_URL;
-
-const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
   e.preventDefault();
 
   if (!validator.isEmail(email)) {
@@ -70,13 +68,12 @@ const handleSubmit = async (e) => {
   setLoading(true);
 
   try {
-    const response = await axios.post(`${API_URL}/api/register`, {
+    const response = await axios.post('https://signup-form-backend.vercel.app/register', {
       name,
       email,
       password,
       confirmPassword,
     });
-
     setSuccessMessage(response.data.message);
     setError('');
     setName('');
@@ -85,13 +82,13 @@ const handleSubmit = async (e) => {
     setConfirmPassword('');
     navigate('/login');
   } catch (err) {
-    console.error(err);
-    setError(err.response?.data?.message || 'An error occurred during registration');
+    setError(err.response?.data?.message || 'An error occurred');
     setSuccessMessage('');
   } finally {
     setLoading(false);
   }
 };
+
 
   return (
     <div className="form-container">
@@ -141,4 +138,3 @@ const handleSubmit = async (e) => {
   );
 };
 
-export default RegistrationForm;
