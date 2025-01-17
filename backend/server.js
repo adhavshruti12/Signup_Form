@@ -12,7 +12,7 @@ const app = express();
 // Middleware
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || 'https://signup-form-frontend.vercel.app', // Use environment variable for flexibility
+    origin: process.env.FRONTEND_URL || 'https://signup-form-frontend.vercel.app/', // Use environment variable for flexibility
     methods: ['POST', 'GET'], // Specify allowed methods
     credentials: true, // Allow cookies and authorization headers
   })
