@@ -2,12 +2,12 @@
 * {
   margin: 0;
   padding: 0;
-  box-sizing: border-box;  /* Prevent padding/border affecting width */
+  box-sizing: border-box; /* Prevent padding/border affecting width */
   font-family: 'Arial', sans-serif;
 }
 
 body {
-  background-color: #f4f7fc;
+  background-color: rgba(0, 0, 0, 0.164);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -15,28 +15,47 @@ body {
   padding: 20px;
 }
 
+/* Form Container - Common Styles */
 .form-container {
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background-color: #ffff;
+  border-radius: 25px;
+  box-shadow: 0 4px 8px rgba(219, 77, 235, 0.1);
   padding: 30px;
-  width: 100%;  /* Ensures form container spans full width of its parent */
-  max-width: 400px;  /* Maximum width for the form */
-  min-width: 350px;  /* Minimum width to avoid form getting too small */
+  width: 100%;
+  max-width: 400px;
+  min-width: 350px;
   text-align: center;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  min-height: 500px;
   transition: all 0.3s ease;
+  border:5px solid #70acf1;
 }
 
+.form-container:hover {
+  background-color: #d4e1f999; /* Darker background on hover */
+  box-shadow: 0 6px 12px rgba(219, 77, 235, 0.2); /* Enhanced shadow effect */
+  transform: scale(1.05); /* Slightly scale up the container */
+}
+
+/* Registration Form Container */
+.registration-form-container {
+  min-height: 550px; /* Adjust for additional fields in registration form */
+}
+
+/* Login Form Container */
+.login-form-container {
+  min-height: 450px; /* Adjust for fewer fields in login form */
+}
+
+/* Form Header */
 h2 {
   color: #333;
   margin-bottom: 20px;
   font-size: 24px;
 }
 
+/* Labels */
 label {
   font-size: 14px;
   color: #555;
@@ -46,16 +65,17 @@ label {
   margin-top: 10px;
 }
 
+/* Input Fields */
 input[type="text"],
 input[type="email"],
 input[type="password"] {
-  width: 100%;  /* Ensures inputs span full width of form */
+  width: 100%; /* Ensures inputs span full width of form */
   padding: 12px;
   border-radius: 6px;
-  border: 1px solid #ccc;
-  margin-bottom: 15px;  /* Consistent margin between fields */
+  border: 2px solid #70acf1;
+  margin-bottom: 15px; /* Consistent margin between fields */
   font-size: 16px;
-  box-sizing: border-box;  /* Ensures padding/border are part of width */
+  box-sizing: border-box; /* Ensures padding/border are part of width */
   transition: border-color 0.3s ease;
 }
 
@@ -67,11 +87,12 @@ input[type="password"]:focus {
   box-shadow: 0 0 5px rgba(108, 99, 255, 0.5);
 }
 
+/* Password Strength and Match Messages */
 .password-strength,
 .password-match {
   font-size: 12px;
   margin-top: 5px;
-  margin-bottom: 15px;  /* Space below the message */
+  margin-bottom: 15px; /* Space below the message */
   color: #888;
 }
 
@@ -91,10 +112,11 @@ input[type="password"]:focus {
   color: red;
 }
 
+/* Buttons */
 button {
-  width: 100%;  /* Ensure button spans full width of form */
+  width: 100%; /* Ensure button spans full width of form */
   padding: 12px;
-  background-color: #6c63ff;
+  background-color: #3d33fb;
   border: none;
   color: white;
   font-size: 16px;
@@ -112,6 +134,7 @@ button:disabled {
   cursor: not-allowed;
 }
 
+/* Success and Error Messages */
 .success-message {
   background-color: #e6fffb;
   color: #52c41a;
@@ -128,4 +151,32 @@ button:disabled {
   padding: 10px;
   margin-bottom: 15px;
   word-wrap: break-word;
+}
+
+/* Links */
+a {
+  
+  color: #6c63ff;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Media Queries for Responsiveness */
+@media (max-width: 480px) {
+  .form-container {
+    padding: 20px;
+    max-width: 90%;
+  }
+
+  h2 {
+    font-size: 20px;
+  }
+
+  button {
+    font-size: 14px;
+  }
 }
