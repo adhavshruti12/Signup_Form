@@ -9,24 +9,16 @@ const User = require('./models/User');
 
 const app = express();
 
-// Middleware for CORS
+// Middleware
+const cors = require('cors');
+
+// Allow requests from your frontend URL
 app.use(cors({
-  origin: 'https://signup-form-frontend.vercel.app', // Your Vercel frontend URL
+  origin: 'https://signup-form-frontend.vercel.app', // Your frontend's deployed URL
   methods: ['GET', 'POST'],
-  credentials: true,
+  credentials: true, // If you need to send cookies
 }));
 
-// Additional Headers for CORS (optional but helps in some cases)
-app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', 'https://signup-form-frontend.vercel.app');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  next();
-});
-
-
-// Body parser
 app.use(bodyParser.json());
 
 // MongoDB Connection
@@ -40,9 +32,9 @@ mongoose
 
 // Registration Endpoint
 app.post('/api/register', async (req, res) => {
-  console.log('Registration request received:', req.body); // Debugging log
   const { name, email, password, confirmPassword } = req.body;
 
+  // Input validation
   if (!validator.isEmail(email)) {
     return res.status(400).json({ message: 'Invalid email format' });
   }
@@ -56,26 +48,28 @@ app.post('/api/register', async (req, res) => {
   }
 
   try {
+    // Check if the email is already registered
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(409).json({ message: 'Email ID already registered' });
+      return res.status(400).json({ message: 'Email ID already registered' });
     }
 
+    // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Save the user to the database
     const newUser = new User({ name, email, password: hashedPassword });
     await newUser.save();
 
     res.status(201).json({ message: 'User registered successfully' });
   } catch (error) {
-    console.error('Error during registration:', error.message);
+    console.error('Error during registration:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
 
 // Login Endpoint
 app.post('/api/login', async (req, res) => {
-  console.log('Login request received:', req.body); // Debugging log
   const { email, password } = req.body;
 
   try {
@@ -91,15 +85,15 @@ app.post('/api/login', async (req, res) => {
 
     res.status(200).json({ name: user.name, message: `Welcome, ${user.name}!` });
   } catch (error) {
-    console.error('Login error:', error.message);
+    console.error('Login error:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
 
-// Default Route
+// Default Route for Health Check
 app.get('/', (req, res) => {
   res.send('Backend is working!');
 });
 
-// Export for Vercel
+// Export for Vercel Serverless Functions
 module.exports = app;
