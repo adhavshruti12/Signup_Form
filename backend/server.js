@@ -12,7 +12,7 @@ const app = express();
 // Middleware
 app.use(
   cors({
-    origin: ['https://deploy-mern-lwhq.vercel.app'], // Replace with your frontend URL
+    origin: process.env.FRONTEND_URL || 'http://localhost:3000', // Use environment variable for flexibility
     methods: ['POST', 'GET'], // Specify allowed methods
     credentials: true, // Allow cookies and authorization headers
   })
@@ -32,6 +32,7 @@ mongoose
 app.post('/api/register', async (req, res) => {
   const { name, email, password, confirmPassword } = req.body;
 
+  // Input validation
   if (!validator.isEmail(email)) {
     return res.status(400).json({ message: 'Invalid email format' });
   }
@@ -45,12 +46,16 @@ app.post('/api/register', async (req, res) => {
   }
 
   try {
+    // Check if the email is already registered
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: 'Email ID already registered' });
     }
 
+    // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Save the user to the database
     const newUser = new User({ name, email, password: hashedPassword });
     await newUser.save();
 
@@ -81,6 +86,11 @@ app.post('/api/login', async (req, res) => {
     console.error('Login error:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
+});
+
+// Default Route for Health Check (Vercel needs this)
+app.get('/', (req, res) => {
+  res.send('Backend is up and running!');
 });
 
 // Export for Vercel Serverless Functions
