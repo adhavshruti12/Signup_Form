@@ -21,12 +21,18 @@ app.use(
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
+        console.error(`Blocked by CORS: ${origin}`);
         callback(new Error('Not allowed by CORS'));
       }
     },
-    methods: ['GET', 'POST'], // Allow only GET and POST methods
+    methods: ['GET', 'POST', 'OPTIONS'], // Allow specific HTTP methods
+    credentials: true, // Include credentials if necessary
   })
 );
+
+// Handle preflight requests
+app.options('*', cors());
+
 app.use(bodyParser.json());
 
 // MongoDB Connection
@@ -36,7 +42,10 @@ mongoose
     useUnifiedTopology: true,
   })
   .then(() => console.log('Connected to MongoDB Atlas'))
-  .catch((err) => console.error('Error connecting to MongoDB:', err.message));
+  .catch((err) => {
+    console.error('Error connecting to MongoDB:', err.message);
+    process.exit(1); // Exit process if MongoDB connection fails
+  });
 
 // Registration Endpoint
 app.post('/api/register', async (req, res) => {
@@ -44,6 +53,10 @@ app.post('/api/register', async (req, res) => {
 
   if (!name || !email || !password || !confirmPassword) {
     return res.status(400).json({ message: 'All fields are required' });
+  }
+
+  if (password !== confirmPassword) {
+    return res.status(400).json({ message: 'Passwords do not match' });
   }
 
   try {
@@ -58,7 +71,7 @@ app.post('/api/register', async (req, res) => {
 
     res.status(201).json({ message: 'User registered successfully' });
   } catch (error) {
-    console.error('Error during registration:', error);
+    console.error('Error during registration:', error.message);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
@@ -66,6 +79,10 @@ app.post('/api/register', async (req, res) => {
 // Login Endpoint
 app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({ message: 'Email and password are required' });
+  }
 
   try {
     const user = await User.findOne({ email });
@@ -80,7 +97,7 @@ app.post('/api/login', async (req, res) => {
 
     res.status(200).json({ name: user.name, message: `Welcome, ${user.name}!` });
   } catch (error) {
-    console.error('Login error:', error);
+    console.error('Login error:', error.message);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
