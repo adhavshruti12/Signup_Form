@@ -20,7 +20,7 @@ const RegistrationForm = () => {
   const backendURL =
     process.env.NODE_ENV === 'development'
       ? 'http://localhost:5000/api'
-      : 'https://signup-form-backend.vercel.app/api';
+      : 'https://signup-form-backend-beryl.vercel.app/';
 
   const checkPasswordStrength = (password) => {
     let strengthMessage = '';
