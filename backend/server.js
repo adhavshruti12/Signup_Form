@@ -14,7 +14,7 @@ const cors = require('cors');
 
 // Allow requests from your frontend URL
 app.use(cors({
-  origin: 'https://signup-form-frontend.vercel.app/', // Your frontend's deployed URL
+  origin: 'https://signup-form-frontend.vercel.app', // Your frontend's deployed URL
   methods: ['GET', 'POST'],
   credentials: true, // If you need to send cookies
 }));
