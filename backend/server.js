@@ -9,14 +9,24 @@ const User = require('./models/User');
 // Initialize Express App
 const app = express();
 
-// CORS Configuration
-const corsOptions = {
-  origin: 'https://signup-form-frontend.vercel.app/', // Allow the frontend domain
-  methods: 'GET,POST,PUT,DELETE,OPTIONS', // Allowed methods
-  credentials: true, // Allow credentials (cookies, authorization headers, etc.)
-};
+// Middleware
+const allowedOrigins = [
+  'http://localhost:3000', // Local frontend
+  'https://signup-form-frontend.vercel.app', // Deployed frontend
+];
 
-app.use(cors(corsOptions));
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    methods: ['GET', 'POST'], // Allow only GET and POST methods
+  })
+);
 app.use(bodyParser.json());
 
 // MongoDB Connection
