@@ -11,13 +11,9 @@ const app = express();
 // Updated CORS Configuration
 const corsOptions = {
   origin: (origin, callback) => {
-    const allowedOrigins = [
-      'https://signup-form-frontend.vercel.app/', // Allow the frontend domain
-    ];
-    if (!origin || allowedOrigins.includes(origin)) {
+    if (!origin || origin === 'https://frontend-kappa-nine-74.vercel.app') {
       callback(null, true);
     } else {
-      console.error(`Blocked by CORS: ${origin}`);
       callback(new Error("Not allowed by CORS"));
     }
   },
