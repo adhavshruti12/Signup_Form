@@ -17,21 +17,17 @@ const allowedOrigins = [
 
 app.use(
   cors({
-    origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps or curl requests)
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
-      }
-    },
-    methods: ['GET', 'POST', 'OPTIONS'], // Allow GET, POST, and OPTIONS
-    allowedHeaders: ['Content-Type', 'Authorization'], // Allow specific headers
+    origin: allowedOrigins, // Allow only specified origins
+    methods: ['GET', 'POST', 'OPTIONS'], // Allow specific methods
+    allowedHeaders: ['Content-Type', 'Authorization'], // Allow headers
     credentials: true, // Enable cookies and credentials
   })
 );
 
-// Middleware to Handle Preflight Requests
+// Parse JSON Request Body
+app.use(bodyParser.json());
+
+// Handle Preflight Requests
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
   res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -42,9 +38,6 @@ app.use((req, res, next) => {
   }
   next();
 });
-
-// Parse JSON Request Body
-app.use(bodyParser.json());
 
 // MongoDB Connection
 mongoose
