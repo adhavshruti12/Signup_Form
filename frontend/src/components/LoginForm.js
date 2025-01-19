@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useNavigate, Link } from 'react-router-dom'; // Import Link for navigation
+import { useNavigate, Link } from 'react-router-dom';
 
 const LoginForm = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  const [loading, setLoading] = useState(false); // Add a loading state
   const navigate = useNavigate();
 
   // Backend URL: Adjust dynamically for local and production
@@ -18,18 +19,27 @@ const LoginForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Reset error and success messages
+    setError('');
+    setSuccessMessage('');
+    setLoading(true);
+
     try {
       const response = await axios.post(`${backendURL}/login`, {
         email,
         password,
       });
 
+      // Save token or user info to localStorage/sessionStorage if needed
+      localStorage.setItem('token', response.data.token);
+
       setSuccessMessage(`Welcome, ${response.data.name}!`);
       setError('');
-      navigate('/dashboard'); // Redirect to the dashboard
+      navigate('/dashboard'); // Redirect to the dashboard after login
     } catch (err) {
-      setError(err.response?.data?.message || 'An error occurred');
-      setSuccessMessage('');
+      setError(err.response?.data?.message || 'Invalid email or password');
+    } finally {
+      setLoading(false); // Stop loading spinner
     }
   };
 
@@ -37,29 +47,38 @@ const LoginForm = () => {
     <div className="form-container">
       <h2>Login</h2>
 
+      {/* Success and Error Messages */}
       {successMessage && <div className="success-message">{successMessage}</div>}
       {error && <div className="error-message">{error}</div>}
 
       <form onSubmit={handleSubmit}>
+        {/* Email Field */}
         <label>Email:</label>
         <input
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
+          placeholder="Enter your email"
         />
 
+        {/* Password Field */}
         <label>Password:</label>
         <input
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
+          placeholder="Enter your password"
         />
 
-        <button type="submit">Login</button>
+        {/* Submit Button */}
+        <button type="submit" disabled={loading}>
+          {loading ? 'Logging in...' : 'Login'}
+        </button>
       </form>
 
+      {/* Redirect to Registration */}
       <div className="redirect">
         <p>
           Don't have an account?{' '}
