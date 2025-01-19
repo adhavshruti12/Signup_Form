@@ -9,7 +9,7 @@ const User = require('./models/User');
 // Initialize Express App
 const app = express();
 
-// Middleware
+// Middleware for CORS
 const allowedOrigins = [
   'http://localhost:3000', // Local frontend
   'https://signup-form-frontend.vercel.app', // Deployed frontend
@@ -18,15 +18,23 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps or curl requests)
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
         callback(new Error('Not allowed by CORS'));
       }
     },
-    methods: ['GET', 'POST'], // Allow only GET and POST methods
+    methods: ['GET', 'POST', 'OPTIONS'], // Allow GET, POST, and OPTIONS
+    allowedHeaders: ['Content-Type', 'Authorization'], // Allow specific headers
+    credentials: true, // Enable cookies and credentials
   })
 );
+
+// Middleware to Handle Preflight Requests
+app.options('*', cors()); // Preflight handling for all routes
+
+// Parse JSON Request Body
 app.use(bodyParser.json());
 
 // MongoDB Connection
