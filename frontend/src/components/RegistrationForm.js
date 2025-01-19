@@ -22,6 +22,7 @@ const RegistrationForm = () => {
       ? 'http://localhost:5000/api'
       : 'https://signup-form-backend.vercel.app/api';
 
+  // Utility to check password strength
   const checkPasswordStrength = (password) => {
     let strengthMessage = '';
     let isValid = true;
@@ -56,16 +57,23 @@ const RegistrationForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Reset messages
+    setError('');
+    setSuccessMessage('');
+
+    // Validate email format
     if (!validator.isEmail(email)) {
       setError('Please enter a valid email address');
       return;
     }
 
+    // Validate password and confirm password match
     if (password !== confirmPassword) {
       setError('Passwords do not match');
       return;
     }
 
+    // Validate password strength
     if (passwordStrength !== 'Password is strong') {
       setError('Please ensure your password meets the strength requirements');
       return;
@@ -74,22 +82,34 @@ const RegistrationForm = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post(`${backendURL}/register`, {
-        name,
-        email,
-        password,
-        confirmPassword,
-      });
+      // Make API call
+      const response = await axios.post(
+        `${backendURL}/register`,
+        {
+          name,
+          email,
+          password,
+          confirmPassword,
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          withCredentials: true, // Important for CORS if cookies are involved
+        }
+      );
+
+      // Handle successful response
       setSuccessMessage(response.data.message);
-      setError('');
       setName('');
       setEmail('');
       setPassword('');
       setConfirmPassword('');
+      setPasswordStrength('');
       navigate('/login');
     } catch (err) {
-      setError(err.response?.data?.message || 'An error occurred');
-      setSuccessMessage('');
+      // Handle errors from backend
+      setError(err.response?.data?.message || 'An error occurred during registration');
     } finally {
       setLoading(false);
     }
