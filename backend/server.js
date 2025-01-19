@@ -32,7 +32,13 @@ app.use(
 );
 
 // Middleware to Handle Preflight Requests
-app.options('*', cors()); // Preflight handling for all routes
+app.options('*', (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.sendStatus(204);
+});
 
 // Parse JSON Request Body
 app.use(bodyParser.json());
@@ -52,6 +58,10 @@ app.post('/api/register', async (req, res) => {
 
   if (!name || !email || !password || !confirmPassword) {
     return res.status(400).json({ message: 'All fields are required' });
+  }
+
+  if (password !== confirmPassword) {
+    return res.status(400).json({ message: 'Passwords do not match' });
   }
 
   try {
@@ -74,6 +84,10 @@ app.post('/api/register', async (req, res) => {
 // Login Endpoint
 app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({ message: 'Email and password are required' });
+  }
 
   try {
     const user = await User.findOne({ email });
