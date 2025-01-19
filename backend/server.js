@@ -6,7 +6,7 @@ const cors = require('cors');
 require('dotenv').config();
 const User = require('./models/User');
 
-// Initialize Express App
+// Initialize Express app
 const app = express();
 
 // Middleware for CORS
