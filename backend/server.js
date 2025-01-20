@@ -11,7 +11,7 @@ const app = express();
 
 // Middleware for CORS
 const allowedOrigins = [
-  'https://signup-form-frontend.vercel.app',
+  'https://signup-form-kappa-tawny.vercel.app',
 ];
 
 app.use((req, res, next) => {
