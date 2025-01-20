@@ -8,15 +8,36 @@ const User = require('./models/User');
 
 const app = express();
 
-// CORS setup to allow only Vercel origin
+// CORS Configuration
 app.use(
   cors({
-    origin: 'https://signup-form-frontend.vercel.app', // Replace with your actual Vercel domain
+    origin: (origin, callback) => {
+      if (process.env.NODE_ENV === 'development') {
+        // Allow all origins in development
+        callback(null, true);
+      } else {
+        // Restrict origins in production
+        const allowedOrigins = ['https://signup-form-frontend.vercel.app'];
+        if (!origin || allowedOrigins.includes(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error('Not allowed by CORS'));
+        }
+      }
+    },
     methods: ['GET', 'POST', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
   })
 );
+
+// Handle preflight requests
+app.options('*', (req, res) => {
+  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.sendStatus(204); // No content
+});
 
 // Middleware to parse JSON body
 app.use(bodyParser.json());
