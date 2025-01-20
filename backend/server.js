@@ -1,160 +1,107 @@
-import React, { useState } from 'react';
-import axios from 'axios';
-import validator from 'validator'; // Email validation
-import { useNavigate } from 'react-router-dom'; // For navigation
+const express = require('express');
+const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+require('dotenv').config();
+const User = require('./models/User');
 
-const RegistrationForm = () => {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [error, setError] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [passwordMatch, setPasswordMatch] = useState(null);
-  const [passwordStrength, setPasswordStrength] = useState('');
+// Initialize Express app
+const app = express();
 
-  const navigate = useNavigate();
+// Middleware for CORS
+const allowedOrigins = [
+  'http://localhost:3000', // Local frontend
+  'https://signup-form-frontend.vercel.app', // Deployed frontend
+];
 
-  // Backend URL: Adjust dynamically for local and production
-  const backendURL =
-    process.env.NODE_ENV === 'development'
-      ? 'http://localhost:5000/api'
-      : 'https://signup-form-backend.vercel.app/api';
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    methods: ['GET', 'POST', 'OPTIONS'], // Allow GET, POST, and OPTIONS
+    allowedHeaders: ['Content-Type', 'Authorization'], // Allow specific headers
+    credentials: true, // Enable cookies and credentials
+  })
+);
 
-  const checkPasswordStrength = (password) => {
-    let strengthMessage = '';
-    let isValid = true;
+// Middleware to Handle Preflight Requests
+app.options('*', cors()); // Preflight handling for all routes
 
-    if (password.length < 6) {
-      strengthMessage = 'Password should be at least 6 characters long';
-      isValid = false;
-    } else if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-      strengthMessage = 'Password should include at least one special character';
-      isValid = false;
-    } else {
-      strengthMessage = 'Password is strong';
+// Parse JSON Request Body
+app.use(bodyParser.json());
+
+// MongoDB Connection
+mongoose
+  .connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => console.log('Connected to MongoDB Atlas'))
+  .catch((err) => console.error('Error connecting to MongoDB:', err.message));
+
+// Registration Endpoint
+app.post('/api/register', async (req, res) => {
+  const { name, email, password, confirmPassword } = req.body;
+
+  if (!name || !email || !password || !confirmPassword) {
+    return res.status(400).json({ message: 'All fields are required' });
+  }
+
+  try {
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: 'Email already registered' });
     }
 
-    setPasswordStrength(strengthMessage);
-    return isValid;
-  };
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = new User({ name, email, password: hashedPassword });
+    await newUser.save();
 
-  const handlePasswordChange = (e) => {
-    const newPassword = e.target.value;
-    setPassword(newPassword);
-    checkPasswordStrength(newPassword);
-    setPasswordMatch(newPassword === confirmPassword);
-  };
+    res.status(201).json({ message: 'User registered successfully' });
+  } catch (error) {
+    console.error('Error during registration:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
 
-  const handleConfirmPasswordChange = (e) => {
-    const newConfirmPassword = e.target.value;
-    setConfirmPassword(newConfirmPassword);
-    setPasswordMatch(password === newConfirmPassword);
-  };
+// Login Endpoint
+app.post('/api/login', async (req, res) => {
+  const { email, password } = req.body;
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!validator.isEmail(email)) {
-      setError('Please enter a valid email address');
-      return;
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
     }
 
-    if (password !== confirmPassword) {
-      setError('Passwords do not match');
-      return;
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: 'Invalid email or password' });
     }
 
-    if (passwordStrength !== 'Password is strong') {
-      setError('Please ensure your password meets the strength requirements');
-      return;
-    }
+    res.status(200).json({ name: user.name, message: `Welcome, ${user.name}!` });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
 
-    setLoading(true);
+// Health Check Route
+app.get('/', (req, res) => {
+  res.send('Backend is working!');
+});
 
-    try {
-      const response = await axios.post(`${backendURL}/register`, {
-        name,
-        email,
-        password,
-        confirmPassword,
-      });
-      setSuccessMessage(response.data.message);
-      setError('');
-      setName('');
-      setEmail('');
-      setPassword('');
-      setConfirmPassword('');
-      navigate('/login');
-    } catch (err) {
-      setError(err.response?.data?.message || 'An error occurred');
-      setSuccessMessage('');
-    } finally {
-      setLoading(false);
-    }
-  };
+// Server Setup for Local and Vercel
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+});
 
-  return (
-    <div className="form-container">
-      <h2>Register</h2>
-
-      {successMessage && <div className="success-message">{successMessage}</div>}
-      {error && <div className="error-message">{error}</div>}
-
-      <form onSubmit={handleSubmit}>
-        <label>Name:</label>
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-        />
-
-        <label>Email:</label>
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-
-        <label>Password:</label>
-        <input
-          type="password"
-          value={password}
-          onChange={handlePasswordChange}
-          required
-        />
-        <div className="password-strength">
-          <small>{passwordStrength}</small>
-        </div>
-
-        <label>Confirm Password:</label>
-        <input
-          type="password"
-          value={confirmPassword}
-          onChange={handleConfirmPasswordChange}
-          required
-        />
-        <div
-          className={`password-match ${
-            passwordMatch ? 'correct' : 'incorrect'
-          }`}
-        >
-          {passwordMatch === false && <small>Passwords do not match</small>}
-          {passwordMatch === true && <small>Passwords match</small>}
-        </div>
-
-        <button type="submit" disabled={loading}>
-          {loading ? 'Registering...' : 'Register'}
-        </button>
-      </form>
-      <p>
-        Already have an account? <a href="/login">Login</a>
-      </p>
-    </div>
-  );
-};
-
-export default RegistrationForm;
+module.exports = app; // Export for Vercel
