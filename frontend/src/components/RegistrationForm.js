@@ -16,11 +16,9 @@ const RegistrationForm = () => {
 
   const navigate = useNavigate();
 
-  // Backend URL: Adjust dynamically for local and production
-  const backendURL =
-    process.env.NODE_ENV === 'development'
-      ? 'http://localhost:5000/api'
-      : 'https://signup-form-backend.vercel.app/api';
+ // Backend URL: Adjust dynamically for local and production
+const backendURL = 'https://signup-form-backend.vercel.app/api'; // Always use production backend
+
 
   const checkPasswordStrength = (password) => {
     let strengthMessage = '';
