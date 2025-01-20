@@ -11,7 +11,7 @@ const app = express();
 // CORS setup to allow only Vercel origin
 app.use(
   cors({
-    origin: 'https://your-vercel-app.vercel.app', // Replace with your actual Vercel domain
+    origin: 'https://signup-form-frontend.vercel.app', // Replace with your actual Vercel domain
     methods: ['GET', 'POST', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
