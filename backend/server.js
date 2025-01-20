@@ -6,39 +6,20 @@ const cors = require('cors');
 require('dotenv').config();
 const User = require('./models/User');
 
-// Initialize Express app
 const app = express();
 
-// Middleware for CORS
+// CORS setup to allow only Vercel origin
 app.use(
   cors({
-    origin: (origin, callback) => {
-      if (!origin || origin.includes('vercel.app')) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
-      }
-    },
+    origin: 'https://your-vercel-app.vercel.app', // Replace with your actual Vercel domain
     methods: ['GET', 'POST', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
   })
 );
 
-// Parse JSON Request Body
+// Middleware to parse JSON body
 app.use(bodyParser.json());
-
-// Handle Preflight Requests
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(204);
-  }
-  next();
-});
 
 // MongoDB Connection
 mongoose
@@ -46,8 +27,8 @@ mongoose
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
-  .then(() => console.log('Connected to MongoDB Atlas'))
-  .catch((err) => console.error('Error connecting to MongoDB:', err.message));
+  .then(() => console.log('Connected to MongoDB'))
+  .catch((err) => console.log('Error connecting to MongoDB:', err));
 
 // Registration Endpoint
 app.post('/api/register', async (req, res) => {
@@ -109,7 +90,7 @@ app.get('/', (req, res) => {
   res.send('Backend is working!');
 });
 
-// Server Setup for Local and Vercel
+// Server Setup
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
