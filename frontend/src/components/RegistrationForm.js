@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import validator from 'validator'; // Email validation
-import { useNavigate } from 'react-router-dom'; // For navigation
+import { useNavigate } from 'react-router-dom';
 
 const RegistrationForm = () => {
   const [name, setName] = useState('');
@@ -11,18 +11,15 @@ const RegistrationForm = () => {
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [loading, setLoading] = useState(false);
-  const [passwordMatch, setPasswordMatch] = useState(null);
   const [passwordStrength, setPasswordStrength] = useState('');
 
   const navigate = useNavigate();
 
-  // Backend URL: Adjust dynamically for local and production
-  const backendURL =
-    process.env.NODE_ENV === 'development'
-      ? 'http://localhost:5000/api'
-      : 'https://signup-form-backend.vercel.app/api';
+  // Backend URL
+  const backendURL = `${window.location.origin.includes('localhost') 
+    ? 'http://localhost:5000/api' 
+    : 'https://signup-form-backend.vercel.app/api'}`;
 
-  // Utility to check password strength
   const checkPasswordStrength = (password) => {
     let strengthMessage = '';
     let isValid = true;
@@ -41,75 +38,45 @@ const RegistrationForm = () => {
     return isValid;
   };
 
-  const handlePasswordChange = (e) => {
-    const newPassword = e.target.value;
-    setPassword(newPassword);
-    checkPasswordStrength(newPassword);
-    setPasswordMatch(newPassword === confirmPassword);
-  };
-
-  const handleConfirmPasswordChange = (e) => {
-    const newConfirmPassword = e.target.value;
-    setConfirmPassword(newConfirmPassword);
-    setPasswordMatch(password === newConfirmPassword);
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Reset messages
     setError('');
     setSuccessMessage('');
 
-    // Validate email format
     if (!validator.isEmail(email)) {
       setError('Please enter a valid email address');
       return;
     }
 
-    // Validate password and confirm password match
     if (password !== confirmPassword) {
       setError('Passwords do not match');
       return;
     }
 
-    // Validate password strength
     if (passwordStrength !== 'Password is strong') {
-      setError('Please ensure your password meets the strength requirements');
+      setError('Password must meet strength requirements');
       return;
     }
 
     setLoading(true);
 
     try {
-      // Make API call
-      const response = await axios.post(
-        `${backendURL}/register`,
-        {
-          name,
-          email,
-          password,
-          confirmPassword,
-        },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          withCredentials: true, // Important for CORS if cookies are involved
-        }
-      );
+      const response = await axios.post(`${backendURL}/register`, {
+        name,
+        email,
+        password,
+        confirmPassword,
+      });
 
-      // Handle successful response
       setSuccessMessage(response.data.message);
       setName('');
       setEmail('');
       setPassword('');
       setConfirmPassword('');
-      setPasswordStrength('');
       navigate('/login');
     } catch (err) {
-      // Handle errors from backend
-      setError(err.response?.data?.message || 'An error occurred during registration');
+      setError(err.response?.data?.message || 'An error occurred');
     } finally {
       setLoading(false);
     }
@@ -130,7 +97,6 @@ const RegistrationForm = () => {
           onChange={(e) => setName(e.target.value)}
           required
         />
-
         <label>Email:</label>
         <input
           type="email"
@@ -138,34 +104,23 @@ const RegistrationForm = () => {
           onChange={(e) => setEmail(e.target.value)}
           required
         />
-
         <label>Password:</label>
         <input
           type="password"
           value={password}
-          onChange={handlePasswordChange}
+          onChange={(e) => setPassword(e.target.value)}
           required
         />
         <div className="password-strength">
           <small>{passwordStrength}</small>
         </div>
-
         <label>Confirm Password:</label>
         <input
           type="password"
           value={confirmPassword}
-          onChange={handleConfirmPasswordChange}
+          onChange={(e) => setConfirmPassword(e.target.value)}
           required
         />
-        <div
-          className={`password-match ${
-            passwordMatch ? 'correct' : 'incorrect'
-          }`}
-        >
-          {passwordMatch === false && <small>Passwords do not match</small>}
-          {passwordMatch === true && <small>Passwords match</small>}
-        </div>
-
         <button type="submit" disabled={loading}>
           {loading ? 'Registering...' : 'Register'}
         </button>
