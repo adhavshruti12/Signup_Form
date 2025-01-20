@@ -14,24 +14,35 @@ const allowedOrigins = [
   'https://signup-form-frontend.vercel.app', // Deployed frontend
 ];
 
+app.use((req, res, next) => {
+  console.log(`Request Origin: ${req.headers.origin}`); // Debug log for request origins
+  next();
+});
+
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests only from allowedOrigins
+      // Allow requests only from allowedOrigins or no origin (Postman, etc.)
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
+        console.error(`Blocked by CORS: ${origin}`); // Debug log for blocked origins
         callback(new Error('Not allowed by CORS'));
       }
     },
-    methods: ['GET', 'POST', 'OPTIONS'], // Allow GET, POST, and OPTIONS
-    allowedHeaders: ['Content-Type', 'Authorization'], // Allow specific headers
+    methods: ['GET', 'POST', 'OPTIONS'], // Allow specific methods
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'], // Add headers as needed
     credentials: true, // Enable cookies and credentials
   })
 );
 
 // Middleware to Handle Preflight Requests
-app.options('*', cors()); // Preflight handling for all routes
+app.options('*', (req, res) => {
+  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.header('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.sendStatus(200);
+});
 
 // Parse JSON Request Body
 app.use(bodyParser.json());
