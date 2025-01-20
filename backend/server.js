@@ -11,16 +11,22 @@ const app = express();
 
 // Middleware for CORS
 const allowedOrigins = [
-  'http://localhost:3000', // Local frontend
   'https://signup-form-frontend.vercel.app', // Deployed frontend
 ];
 
 app.use(
   cors({
-    origin: allowedOrigins, // Allow only specified origins
-    methods: ['GET', 'POST', 'OPTIONS'], // Allow specific methods
-    allowedHeaders: ['Content-Type', 'Authorization'], // Allow headers
-    credentials: true, // Enable cookies and credentials
+    origin: (origin, callback) => {
+      // Allow Vercel origin and local during development
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    methods: ['GET', 'POST', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
   })
 );
 
