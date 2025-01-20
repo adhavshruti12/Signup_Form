@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import validator from 'validator'; // Email validation
+import validator from 'validator'; // For email validation
 import { useNavigate } from 'react-router-dom';
 
 const RegistrationForm = () => {
@@ -15,10 +15,10 @@ const RegistrationForm = () => {
 
   const navigate = useNavigate();
 
-  // Backend URL
-  const backendURL = `${window.location.origin.includes('localhost') 
+  // Dynamically set backend URL depending on the environment (local or Vercel)
+  const backendURL = window.location.origin.includes('localhost') 
     ? 'http://localhost:5000/api' 
-    : 'https://signup-form-backend.vercel.app/api'}`;
+    : 'https://your-vercel-app.vercel.app/api';  // Replace with your Vercel link
 
   const checkPasswordStrength = (password) => {
     let strengthMessage = '';
