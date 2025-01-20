@@ -11,10 +11,11 @@ const LoginForm = () => {
 
   const navigate = useNavigate();
 
-  // Backend URL
-  const backendURL = `${window.location.origin.includes('localhost') 
-    ? 'http://localhost:5000/api' 
-    : 'https://signup-form-backend.vercel.app/api'}`;
+  // Backend URL: Dynamically set based on environment
+  const backendURL =
+    process.env.NODE_ENV === 'production'
+      ? 'https://signup-form-backend.vercel.app/api'
+      : 'http://localhost:5000/api';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -28,10 +29,12 @@ const LoginForm = () => {
         password,
       });
 
+      // Set success message and navigate to dashboard
       setSuccessMessage(`Welcome, ${response.data.name}!`);
       setError('');
-      navigate('/dashboard');
+      navigate('/dashboard'); // Ensure you have a route defined for '/dashboard'
     } catch (err) {
+      // Display error message returned from the backend
       setError(err.response?.data?.message || 'Invalid email or password');
     } finally {
       setLoading(false);

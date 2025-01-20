@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import validator from 'validator'; // Email validation
-import { useNavigate } from 'react-router-dom'; // For navigation
+import validator from 'validator';
+import { useNavigate } from 'react-router-dom';
 
 const RegistrationForm = () => {
   const [name, setName] = useState('');
@@ -16,9 +16,11 @@ const RegistrationForm = () => {
 
   const navigate = useNavigate();
 
- // Backend URL: Adjust dynamically for local and production
-const backendURL = 'https://signup-form-backend.vercel.app/api'; // Always use production backend
-
+  // Backend URL: Adjust dynamically for local and production
+  const backendURL =
+    process.env.NODE_ENV === 'production'
+      ? 'https://signup-form-backend.vercel.app/api'
+      : 'http://localhost:5000/api';
 
   const checkPasswordStrength = (password) => {
     let strengthMessage = '';
