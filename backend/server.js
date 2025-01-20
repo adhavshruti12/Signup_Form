@@ -12,7 +12,13 @@ const app = express();
 // Middleware for CORS
 app.use(
   cors({
-    origin: process.env.ALLOWED_ORIGIN || 'https://signup-form-frontend.vercel.app',
+    origin: (origin, callback) => {
+      if (!origin || origin.includes('vercel.app')) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     methods: ['GET', 'POST', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
